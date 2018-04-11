@@ -1,0 +1,8 @@
+.DS_Store
+*.log
+.idea
+doc/*.html
+node_modules
+package-lock.json
+wiki
+## release later
