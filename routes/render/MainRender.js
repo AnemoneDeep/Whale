@@ -1,7 +1,6 @@
 /**
  * Route url
- * Define routes and don't change
- * @param app
+ * todo not done yet
  */
 let redirectChange = function (req, res, destination) {
 	switch (destination) {
@@ -14,6 +13,19 @@ let redirectChange = function (req, res, destination) {
 			break
 	}
 };
+
+function errHanld(app){
+	app.use((err, req, res, next) => {
+		console.log(err.status, '---------------------')
+		res.status(err.status || 500);
+		res.render("error", {
+			message: err.message,
+			error: {}
+		});
+	});
+	
+}
+
 module.exports = function (app) {
 	
 	app.get('/', function (req, res) {
@@ -23,6 +35,7 @@ module.exports = function (app) {
 		});
 		
 	});
+	errHanld(app)
 };
 
 

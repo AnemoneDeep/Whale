@@ -10,6 +10,3 @@ let MainRender = require('./render/MainRender');
 module.exports = function (app) {
 	MainRender(app);
 };
-
-
-

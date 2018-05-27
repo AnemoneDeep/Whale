@@ -1,5 +1,5 @@
 /**
- * whale
+ * whale config
  *       merge config
  *
  *

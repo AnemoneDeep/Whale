@@ -19,10 +19,10 @@ const MongoClient = require('mongodb').MongoClient;
 let winston = require('winston');
 let expressWinston = require('express-winston');
 
-// run Whale
+//  Whale connect Mongo
 let Whale = {
 	init: function (cb) {
-		if (WhaleConfig.DB.MongoDB) {  // connect Mongo
+		if (WhaleConfig.DB.MongoDB) {
 			MongoClient.connect("mongodb://" + WhaleConfig.DBhost + "/" + WhaleConfig.DBdb, function (err, dbMongo) {
 				if (err) throw err;
 				global.DBMongo = dbMongo;
@@ -37,7 +37,7 @@ let Whale = {
 Whale.init(() => {
 	let app = express();
 	Configuration(app);
-	if (WhaleConfig.extendFn) WhaleConfig.extendFn.fn()
+	if (WhaleConfig.extendFn) WhaleConfig.extendFn.fn() // todo no need
 	
 	app.use(expressWinston.logger({
 		transports: [
@@ -66,8 +66,8 @@ Whale.init(() => {
 			})
 		]
 	}));
-	
-	ExpressRun(app);
+	//socket.io
+	SocketIO(app);
 })
 
 function Configuration(app) {
@@ -94,18 +94,19 @@ function Configuration(app) {
 	 connect-mongo
 	 mongodb: 'mongodb://localhost:27017/myblog'
 	 */
-	/*	app.use(session({
-	 secret: WhaleConfig.DBcookieSecret,
-	 key: WhaleConfig.DBdb,//cookie name
-	 cookie: {maxAge: 1000 * 60 * 60 * 24 * 30}, //30 days
-	 store: new MongoStore({
-	 url: "mongodb://" + WhaleConfig.DBhost + "/" + WhaleConfig.DBdb
-	 /!*            db: WhaleConfig.DBdb,
-	 host: WhaleConfig.DBhost,
-	 port: WhaleConfig.DBport*!/
-	 })
-	 }));*/
-	
+	if (WhaleConfig.DB.MongoDB) {
+		app.use(session({
+			secret: WhaleConfig.DBcookieSecret,
+			key: WhaleConfig.DBdb,//cookie name
+			cookie: {maxAge: 1000 * 60 * 60 * 24 * 30}, //30 days
+			store: new MongoStore({
+				url: "mongodb://" + WhaleConfig.DBhost + "/" + WhaleConfig.DBdb,
+				db: WhaleConfig.DBdb,
+				host: WhaleConfig.DBhost,
+				port: WhaleConfig.DBport
+			})
+		}));
+	}
 	// catch
 	process.on('exit', function () {
 		console.log('process is exit bey ~ ~')
@@ -122,8 +123,9 @@ function Configuration(app) {
  * @param app
  * @constructor
  * config set open socket.io
+ * add socket change express bootstrap code
  */
-function ExpressRun(app) {
+function SocketIO(app) {
 	
 	if (WhaleConfig.socket) {
 		let _http = require('http').Server(app);
@@ -131,7 +133,7 @@ function ExpressRun(app) {
 		handIo(io);
 		
 		_http.listen(app.get('port'), function () {
-			console.log('Express server listening on port' + app.get('port'), 'express run');
+			console.log('Express + socket.io server listening on port' + app.get('port'), 'express run');
 		});
 		
 	} else {
@@ -163,7 +165,6 @@ function handIo(io) {
 		socket.on('disconnect', function () {
 			console.log('user disconnected');
 		});
-		
 		
 		socket.on('chat message', function (msg) {
 			console.log('message: ' + msg);
